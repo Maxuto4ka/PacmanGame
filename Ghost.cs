@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PacmanGame
 {
-    internal class Ghost
+    public class Ghost
     {
         public int X { get; private set; }
         public int Y { get; private set; }
@@ -38,6 +38,11 @@ namespace PacmanGame
             this.offsetX = offsetX; 
             this.offsetY = offsetY;
         }
+        public void SetPosition(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
         public void MoveTowardsPacman(Pacman pacman, Maze maze)
         {
             if (!isActive) return;
@@ -63,7 +68,7 @@ namespace PacmanGame
                 {
                     path = algorithm.FindPath(new Point(X, Y), new Point(pacman.startX, pacman.startY), maze);
                 }
-                //path = algorithm.FindPath(new Point(X, Y), new Point(pacman.X, pacman.Y), maze);
+                path = algorithm.FindPath(new Point(X, Y), new Point(pacman.X, pacman.Y), maze);
                 pathIndex = 0;
             }
 

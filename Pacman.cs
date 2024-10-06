@@ -10,7 +10,7 @@ using static System.Windows.Forms.AxHost;
 namespace PacmanGame
 {
     public enum Direction { Up, Down, Left, Right }
-    internal class Pacman
+    public class Pacman
     {
         public int X { get; private set; }
         public int Y { get; private set; }
@@ -24,7 +24,16 @@ namespace PacmanGame
             startX = x;
             startY = y;
         }
-
+        public void SetPosition(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
+        public void ResetPosition(Point newPosition)
+        {
+            X = newPosition.X;
+            Y = newPosition.Y;
+        }
         public void Move(Direction direction, Maze maze)
         {
             int newX = X, newY = Y;

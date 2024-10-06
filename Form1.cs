@@ -25,19 +25,37 @@ namespace PacmanGame
             this.DoubleBuffered = true;
 
             // Ініціалізація гри
-            maze = new Maze(21, 22); // Лабіринт 21х22
-            pacman = new Pacman(10, 16); // Позиція, з якої стартує пакмен
+            maze = new Maze(21, 23); // Лабіринт 21х22
+
+            /*pacman = new Pacman(10, 16); // Позиція, з якої стартує пакмен
             ghosts = new List<Ghost>
             {
                 new Ghost(1, 1, new AStarAlgorithm(), Color.Red, 2, 0),  // Привид з алгоритмом A*
                 new Ghost(10, 10, new BFSAlgorithm(), Color.Blue, 0, -2)  // Привид з алгоритмом BFS
-            };
-            // Привиди сплять на початку
+            };*/
+
+            ghosts = new List<Ghost>();  // Ініціалізація списку
+            var spawnPoints = maze.GetRandomSpawnPoint(pacman, ghosts);
+            
+            pacman = new Pacman(maze.GetRandomSpawnPoint(pacman, ghosts).X, maze.GetRandomSpawnPoint(pacman, ghosts).Y);
+
+            ghosts.Add(new Ghost(1, 1, new AStarAlgorithm(), Color.Red, 2, 0));  // Привид з алгоритмом A*
+            ghosts.Add(new Ghost(10, 10, new BFSAlgorithm(), Color.Blue, 0, -2)); // Привид з алгоритмом BFS
             foreach (var ghost in ghosts)
             {
-                ghost.Sleep();
+                    Point spawnPoint = maze.GetRandomSpawnPoint(pacman, ghosts);
+                    ghost.SetPosition(spawnPoint.X, spawnPoint.Y);
             }
 
+
+            // Привиди сплять на початку
+            if (ghosts != null)
+            {
+                foreach (var ghost in ghosts)
+                {
+                    ghost.Sleep();
+                }
+            }
             // Таймер для оновлення гри
             gameTimer = new Timer();
             gameTimer.Interval = 200; // Оновлення кожні 200 мс
@@ -50,11 +68,13 @@ namespace PacmanGame
         private void GameTick(object sender, EventArgs e)
         {
             if (isGameOver) return;
-
-            foreach (var ghost in ghosts)
+            if (ghosts != null)
             {
-                ghost.MoveTowardsPacman(pacman, maze);
-                CheckCollisionWithGhosts();
+                foreach (var ghost in ghosts)
+                {
+                    ghost.MoveTowardsPacman(pacman, maze);
+                    CheckCollisionWithGhosts();
+                }
             }
 
             Invalidate();
@@ -68,14 +88,18 @@ namespace PacmanGame
             // Малюємо лабіринт, пакмена та привидів
             maze.Draw(g);
             pacman.Draw(g);
-            foreach (var ghost in ghosts)
+
+            if (ghosts != null)
             {
-                ghost.Draw(g);
+                foreach (var ghost in ghosts)
+                {
+                    ghost.Draw(g);
+                }
             }
             // Малюємо життя  пакмена за межами лабіринту
             for (int i = 0; i < lives; i++)
             {
-                e.Graphics.FillEllipse(Brushes.Red, new Rectangle(30 + (i * 20), 450, 15, 15));
+                e.Graphics.FillEllipse(Brushes.Red, new Rectangle(30 + (i * 20), 500, 15, 15));
             }
         }
 
@@ -98,9 +122,12 @@ namespace PacmanGame
                     pacman.Move(Direction.Right, maze);
                     break;
             }
-            foreach (var ghost in ghosts)
+            if (ghosts != null)
             {
-                ghost.Activate();
+                foreach (var ghost in ghosts)
+                {
+                    ghost.Activate();
+                }
             }
             CheckCollisionWithGhosts();
         }
@@ -142,6 +169,32 @@ namespace PacmanGame
             }
             else
             {
+                // Повертаємо Пакмена і привидів на рандомні стартові позиції
+                var pacmanSpawn = maze.GetRandomSpawnPoint(null, ghosts);
+                pacman.SetPosition(pacmanSpawn.X, pacmanSpawn.Y);
+
+                foreach (var ghost in ghosts)
+                {
+                    var ghostSpawn = maze.GetRandomSpawnPoint(pacman, ghosts);
+                    ghost.SetPosition(ghostSpawn.X, ghostSpawn.Y);
+                }
+
+                Invalidate(); // Оновлюємо екран після скидання позицій
+            }
+        }
+
+
+        /*private void LoseLife()
+        {
+            if (isGameOver) return;
+            lives--;
+
+            if (lives <= 0)
+            {
+                GameOver(); // Якщо життя закінчилися, гра закінчується
+            }
+            else
+            {
                 // Повертаємо Пакмена і привидів на стартові позиції
                 pacman.ResetPosition();
                 foreach (var ghost in ghosts)
@@ -151,7 +204,7 @@ namespace PacmanGame
 
                 Invalidate();
             }
-        }
+        }*/
 
         // Метод для завершення гри
         private void GameOver()
